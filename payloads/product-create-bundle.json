@@ -1,0 +1,16 @@
+{
+  "@type": "Product",
+  "name": "Triple Play Bundle",
+  "description": "Internet + TV + Phone bundle",
+  "isBundle": true,
+  "isCustomerVisible": true,
+  "status": "active",
+  "productCharacteristic": [
+    {
+      "@type": "StringCharacteristic",
+      "name": "BundleTier",
+      "valueType": "string",
+      "value": "Premium"
+    }
+  ]
+}

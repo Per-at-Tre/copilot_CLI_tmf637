@@ -1,0 +1,14 @@
+{
+  "@type": "__EVENT_TYPE__",
+  "eventId": "__EVENT_ID__",
+  "eventTime": "__EVENT_TIME__",
+  "eventType": "__EVENT_TYPE__",
+  "event": {
+    "product": {
+      "@type": "Product",
+      "id": "sim-product-001",
+      "name": "Simulated Product",
+      "status": "active"
+    }
+  }
+}

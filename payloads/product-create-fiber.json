@@ -1,0 +1,59 @@
+{
+  "@type": "Product",
+  "name": "Fiber 1Gbps – Jean",
+  "description": "Offering-based fiber product with recurring price",
+  "isBundle": false,
+  "isCustomerVisible": true,
+  "status": "created",
+  "productOffering": {
+    "@type": "ProductOfferingRef",
+    "@referredType": "ProductOffering",
+    "id": "PO-101-1",
+    "name": "Voice Over IP Basic",
+    "href": "http://host/productCatalogManagement/v5/productOffering/PO-101-1"
+  },
+  "productPrice": [
+    {
+      "@type": "ProductPrice",
+      "priceType": "recurring",
+      "recurringChargePeriod": "month",
+      "price": {
+        "@type": "Price",
+        "taxIncludedAmount": { "unit": "EUR", "value": 29.99 },
+        "taxRate": 15
+      },
+      "productOfferingPrice": {
+        "@type": "ProductOfferingPriceRef",
+        "@referredType": "ProductOfferingPrice",
+        "id": "POP1",
+        "name": "Fiber recurring fee",
+        "href": "http://host/productCatalogManagement/v5/productOfferingPrice/POP1"
+      }
+    }
+  ],
+  "productTerm": [
+    {
+      "@type": "ProductTerm",
+      "name": "12 month commitment",
+      "description": "Fiber standard commitment",
+      "duration": { "amount": 12, "units": "month" },
+      "validFor": {
+        "startDateTime": "2024-01-01T00:00:00.000Z",
+        "endDateTime": "2025-01-01T00:00:00.000Z"
+      }
+    }
+  ],
+  "relatedParty": [
+    {
+      "@type": "RelatedPartyOrPartyRole",
+      "role": "owner",
+      "partyOrPartyRole": {
+        "@type": "PartyRef",
+        "@referredType": "Individual",
+        "id": "45hj-8888",
+        "name": "Jean",
+        "href": "http://host/partyManagement/v5/individual/45hj-8888"
+      }
+    }
+  ]
+}

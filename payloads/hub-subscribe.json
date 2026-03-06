@@ -1,0 +1,5 @@
+{
+  "@type": "Hub",
+  "callback": "http://localhost:9000/listener",
+  "query": "eventType=ProductCreateEvent,ProductStateChangeEvent"
+}

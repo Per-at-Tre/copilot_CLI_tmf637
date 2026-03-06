@@ -1,0 +1,7 @@
+{
+  "@type": "Product",
+  "name": "State Transition Test Product",
+  "status": "created",
+  "isBundle": false,
+  "isCustomerVisible": true
+}

@@ -1,0 +1,12 @@
+{
+  "@type": "Product",
+  "productCharacteristic": [
+    {
+      "@type": "ObjectCharacteristic",
+      "id": "Char5",
+      "name": "FiberSpeed",
+      "valueType": "object",
+      "value": { "@type": "Speed", "volume": 200, "unit": "Mbps" }
+    }
+  ]
+}

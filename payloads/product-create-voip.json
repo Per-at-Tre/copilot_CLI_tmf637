@@ -1,0 +1,44 @@
+{
+  "@type": "Product",
+  "name": "Voice Over IP Basic – Louise",
+  "description": "Spec-based VoIP product instance",
+  "isBundle": false,
+  "isCustomerVisible": false,
+  "status": "created",
+  "productSpecification": {
+    "@type": "ProductSpecificationRef",
+    "@referredType": "ProductSpecification",
+    "id": "PS-101",
+    "href": "http://host/productCatalogManagement/v5/productSpecification/PS-101",
+    "version": "1"
+  },
+  "productCharacteristic": [
+    {
+      "@type": "BooleanCharacteristic",
+      "id": "Char1",
+      "name": "FixedIP",
+      "valueType": "boolean",
+      "value": false
+    },
+    {
+      "@type": "ObjectCharacteristic",
+      "id": "Char5",
+      "name": "FiberSpeed",
+      "valueType": "object",
+      "value": { "@type": "Speed", "volume": 90, "unit": "Mbps" }
+    }
+  ],
+  "relatedParty": [
+    {
+      "@type": "RelatedPartyOrPartyRole",
+      "role": "User",
+      "partyOrPartyRole": {
+        "@type": "PartyRef",
+        "@referredType": "Individual",
+        "id": "45hj-999",
+        "name": "Louise",
+        "href": "http://host/partyManagement/v5/individual/45hj-999"
+      }
+    }
+  ]
+}

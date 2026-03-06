@@ -1,0 +1,16 @@
+{
+  "@type": "Product",
+  "relatedParty": [
+    {
+      "@type": "RelatedPartyOrPartyRole",
+      "role": "User",
+      "partyOrPartyRole": {
+        "@type": "PartyRef",
+        "@referredType": "Individual",
+        "id": "45hj-999",
+        "name": "Louise M.",
+        "href": "http://host/partyManagement/v5/individual/45hj-999"
+      }
+    }
+  ]
+}

@@ -11,6 +11,10 @@ set -euo pipefail
 BASE_URL="http://localhost:8637/tmf-api/productInventoryManagement/v5"
 CT="Content-Type: application/json"
 
+# Resolve payloads/ relative to the script location
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PAYLOADS_DIR="$SCRIPT_DIR/payloads"
+
 # Colors
 RED='\033[0;31m'; GREEN='\033[0;32m'; YELLOW='\033[1;33m'
 CYAN='\033[0;36m'; BOLD='\033[1m'; NC='\033[0m'
@@ -28,6 +32,21 @@ log_warn()    { echo -e "  ${YELLOW}⚠${NC}  $1" >&2; }
 log_info()    { echo -e "  ${YELLOW}→${NC}  $1" >&2; }
 
 pause() { [[ "${FAST:-0}" == "1" ]] && return; sleep "${1:-0.3}"; }
+
+# Load a payload file from $PAYLOADS_DIR.
+load_payload() { cat "$PAYLOADS_DIR/$1"; }
+
+# Load a .tmpl.json file and substitute __KEY__ tokens.
+# Usage: render_payload FILE KEY1 VALUE1 [KEY2 VALUE2 ...]
+render_payload() {
+  local content
+  content=$(cat "$PAYLOADS_DIR/$1"); shift
+  while [[ $# -ge 2 ]]; do
+    content="${content//__${1}__/$2}"
+    shift 2
+  done
+  printf '%s' "$content"
+}
 
 # Make a request, print status, return the response body on stdout.
 # Usage: body=$(req LABEL METHOD URL [extra curl args...])
@@ -95,98 +114,17 @@ scenario_crud_lifecycle() {
   # --- CREATE ---
   local id1
   id1=$(create_product "Create spec-based product (VoIP)" \
-    '{
-      "@type": "Product",
-      "name": "Voice Over IP Basic – Louise",
-      "description": "Spec-based VoIP product instance",
-      "isBundle": false,
-      "isCustomerVisible": false,
-      "status": "created",
-      "productSpecification": {
-        "@type": "ProductSpecificationRef",
-        "@referredType": "ProductSpecification",
-        "id": "PS-101",
-        "href": "http://host/productCatalogManagement/v5/productSpecification/PS-101",
-        "version": "1"
-      },
-      "productCharacteristic": [
-        { "@type": "BooleanCharacteristic", "id": "Char1", "name": "FixedIP",
-          "valueType": "boolean", "value": false },
-        { "@type": "ObjectCharacteristic", "id": "Char5", "name": "FiberSpeed",
-          "valueType": "object", "value": { "@type": "Speed", "volume": 90, "unit": "Mbps" } }
-      ],
-      "relatedParty": [{
-        "@type": "RelatedPartyOrPartyRole", "role": "User",
-        "partyOrPartyRole": {
-          "@type": "PartyRef", "@referredType": "Individual",
-          "id": "45hj-999", "name": "Louise",
-          "href": "http://host/partyManagement/v5/individual/45hj-999"
-        }
-      }]
-    }')
+    "$(load_payload product-create-voip.json)")
   pause
 
   local id2
   id2=$(create_product "Create offering-based product (Fiber + pricing)" \
-    '{
-      "@type": "Product",
-      "name": "Fiber 1Gbps – Jean",
-      "description": "Offering-based fiber product with recurring price",
-      "isBundle": false,
-      "isCustomerVisible": true,
-      "status": "created",
-      "productOffering": {
-        "@type": "ProductOfferingRef", "@referredType": "ProductOffering",
-        "id": "PO-101-1", "name": "Voice Over IP Basic",
-        "href": "http://host/productCatalogManagement/v5/productOffering/PO-101-1"
-      },
-      "productPrice": [{
-        "@type": "ProductPrice", "priceType": "recurring",
-        "recurringChargePeriod": "month",
-        "price": {
-          "@type": "Price",
-          "taxIncludedAmount": { "unit": "EUR", "value": 29.99 },
-          "taxRate": 15
-        },
-        "productOfferingPrice": {
-          "@type": "ProductOfferingPriceRef", "@referredType": "ProductOfferingPrice",
-          "id": "POP1", "name": "Fiber recurring fee",
-          "href": "http://host/productCatalogManagement/v5/productOfferingPrice/POP1"
-        }
-      }],
-      "productTerm": [{
-        "@type": "ProductTerm", "name": "12 month commitment",
-        "description": "Fiber standard commitment",
-        "duration": { "amount": 12, "units": "month" },
-        "validFor": {
-          "startDateTime": "2024-01-01T00:00:00.000Z",
-          "endDateTime":   "2025-01-01T00:00:00.000Z"
-        }
-      }],
-      "relatedParty": [{
-        "@type": "RelatedPartyOrPartyRole", "role": "owner",
-        "partyOrPartyRole": {
-          "@type": "PartyRef", "@referredType": "Individual",
-          "id": "45hj-8888", "name": "Jean",
-          "href": "http://host/partyManagement/v5/individual/45hj-8888"
-        }
-      }]
-    }')
+    "$(load_payload product-create-fiber.json)")
   pause
 
   local id3
   id3=$(create_product "Create bundle product (Triple Play)" \
-    '{
-      "@type": "Product",
-      "name": "Triple Play Bundle",
-      "description": "Internet + TV + Phone bundle",
-      "isBundle": true,
-      "isCustomerVisible": true,
-      "status": "active",
-      "productCharacteristic": [
-        { "@type": "StringCharacteristic", "name": "BundleTier", "valueType": "string", "value": "Premium" }
-      ]
-    }')
+    "$(load_payload product-create-bundle.json)")
   pause
 
   # --- RETRIEVE ---
@@ -204,31 +142,15 @@ scenario_crud_lifecycle() {
   # --- PATCH ---
   if [[ -n "$id1" ]]; then
     patch_product "Patch status → active" "$id1" \
-      '{"@type": "Product", "status": "active"}'
+      "$(load_payload product-patch-status-active.json)"
     pause
 
     patch_product "Patch FiberSpeed → 200 Mbps" "$id1" \
-      '{
-        "@type": "Product",
-        "productCharacteristic": [
-          { "@type": "ObjectCharacteristic", "id": "Char5", "name": "FiberSpeed",
-            "valueType": "object", "value": { "@type": "Speed", "volume": 200, "unit": "Mbps" } }
-        ]
-      }'
+      "$(load_payload product-patch-fiberspeed.json)"
     pause
 
     patch_product "Patch relatedParty name" "$id1" \
-      '{
-        "@type": "Product",
-        "relatedParty": [{
-          "@type": "RelatedPartyOrPartyRole", "role": "User",
-          "partyOrPartyRole": {
-            "@type": "PartyRef", "@referredType": "Individual",
-            "id": "45hj-999", "name": "Louise M.",
-            "href": "http://host/partyManagement/v5/individual/45hj-999"
-          }
-        }]
-      }'
+      "$(load_payload product-patch-relatedparty.json)"
     pause
   fi
 
@@ -310,13 +232,13 @@ scenario_errors() {
   log_info "400 – POST missing @type field"
   local status
   status=$(curl -s -o /dev/null -w '%{http_code}' -X POST "$BASE_URL/product" \
-    -H "$CT" -d '{"name": "Missing type"}')
+    -H "$CT" -d "$(load_payload error-missing-type.json)")
   log_warn "POST (missing @type) → $status"
   pause
 
   log_info "400 – POST empty body"
   status=$(curl -s -o /dev/null -w '%{http_code}' -X POST "$BASE_URL/product" \
-    -H "$CT" -d '{}')
+    -H "$CT" -d "$(load_payload error-empty-body.json)")
   log_warn "POST (empty body) → $status"
   pause
 
@@ -335,11 +257,7 @@ scenario_event_subscriptions() {
   local hub_resp
   hub_resp=$(curl -s -w '\n__STATUS__%{http_code}' \
     -X POST "$BASE_URL/hub" -H "$CT" \
-    -d '{
-      "@type": "Hub",
-      "callback": "http://localhost:9000/listener",
-      "query": "eventType=ProductCreateEvent,ProductStateChangeEvent"
-    }')
+    -d "$(load_payload hub-subscribe.json)")
   hub_status=$(printf '%s' "$hub_resp" | tail -1 | sed 's/__STATUS__//')
   hub_body=$(printf '%s' "$hub_resp" | sed '$d')
   hub_id=$(printf '%s' "$hub_body" | python3 -c \
@@ -394,20 +312,10 @@ scenario_notifications() {
     local status
     status=$(curl -s -o /dev/null -w '%{http_code}' \
       -X POST "$BASE_URL/listener/$path" -H "$CT" \
-      -d "{
-        \"@type\": \"$etype\",
-        \"eventId\": \"sim-evt-$(date +%s)\",
-        \"eventTime\": \"$now\",
-        \"eventType\": \"$etype\",
-        \"event\": {
-          \"product\": {
-            \"@type\": \"Product\",
-            \"id\": \"sim-product-001\",
-            \"name\": \"Simulated Product\",
-            \"status\": \"active\"
-          }
-        }
-      }")
+      -d "$(render_payload notification-event.tmpl.json \
+            EVENT_TYPE "$etype" \
+            EVENT_ID   "sim-evt-$(date +%s)" \
+            EVENT_TIME "$now")")
     if [[ "$status" =~ ^2 ]]; then
       log_ok "POST /listener/$path → $status"
     else
@@ -422,19 +330,13 @@ scenario_state_transitions() {
 
   local id
   id=$(create_product "Create product for state transitions" \
-    '{
-      "@type": "Product",
-      "name": "State Transition Test Product",
-      "status": "created",
-      "isBundle": false,
-      "isCustomerVisible": true
-    }')
+    "$(load_payload product-create-state-test.json)")
   pause
 
   if [[ -n "$id" ]]; then
     for state in active suspended terminated; do
       patch_product "State → $state" "$id" \
-        "{\"@type\": \"Product\", \"status\": \"$state\"}"
+        "$(render_payload product-patch-status.tmpl.json STATUS "$state")"
       pause
     done
   else
@@ -487,7 +389,7 @@ scenario_burst() {
   for i in $(seq 1 5); do
     { curl -s -o /dev/null -w "  create-$i → %{http_code}\n" \
         -X POST "$BASE_URL/product" -H "$CT" \
-        -d "{\"@type\":\"Product\",\"name\":\"Burst Product $i\",\"status\":\"created\",\"isBundle\":false,\"isCustomerVisible\":false}"; } &
+        -d "$(render_payload product-create-burst.tmpl.json NAME "Burst Product $i")"; } &
     pids+=($!)
   done
   for pid in "${pids[@]}"; do wait "$pid"; done
